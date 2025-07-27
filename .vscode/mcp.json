@@ -1,0 +1,68 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "db-encryption-key",
+      "description": "Database Encryption Key",
+      "password": true
+    },
+    {
+      "type": "promptString", 
+      "id": "admin-user",
+      "description": "Admin Username",
+      "password": false
+    }
+  ],
+  "servers": {
+    "app-monitor": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "${workspaceFolder}/app_monitor_server.py",
+        "--log-level", "INFO",
+        "--max-records", "10000",
+        "--timeout", "30"
+      ],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}",
+        "PYTHONUNBUFFERED": "1",
+        "APP_ENV": "production",
+        "DB_ENCRYPTION_KEY": "${input:db-encryption-key}",
+        "ADMIN_USER": "${input:admin-user}",
+        "MAX_QUERY_RESULTS": "1000",
+        "RATE_LIMIT_REQUESTS": "100",
+        "RATE_LIMIT_WINDOW": "60",
+        "LOG_LEVEL": "INFO",
+        "ENABLE_AUDIT_LOG": "true",
+        "DB_BACKUP_ENABLED": "true",
+        "DB_BACKUP_INTERVAL": "3600"
+      },
+      "envFile": "${workspaceFolder}/.env.mcp",
+      "cwd": "${workspaceFolder}",
+      "timeout": 30000,
+      "restart": {
+        "enabled": true,
+        "maxAttempts": 3,
+        "delay": 5000
+      },
+      "watch": {
+        "enabled": true,
+        "files": [
+          "${workspaceFolder}/app_monitor_server.py",
+          "${workspaceFolder}/*.py",
+          "${workspaceFolder}/.env.mcp",
+          "${workspaceFolder}/requirements.txt"
+        ],
+        "ignore": [
+          "**/node_modules/**",
+          "**/__pycache__/**",
+          "**/.git/**",
+          "**/venv/**",
+          "**/env/**",
+          "**/.vscode/**"
+        ],
+        "debounce": 1000
+      }
+    }
+  }
+}

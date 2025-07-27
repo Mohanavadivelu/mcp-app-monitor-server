@@ -1,0 +1,26 @@
+# Database files
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
+
+# Environment files
+.env*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+
+# Backups
+app_monitor_backup_*.db
+
+# VS Code
+.vscode/settings.json

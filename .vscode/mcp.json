@@ -18,7 +18,7 @@
       "type": "stdio",
       "command": "C:/Users/Movadivelu/AppData/Local/Programs/Python/Python313/python.exe",
       "args": [
-        "${workspaceFolder}/app_monitor_server.py",
+        "${workspaceFolder}/main.py",
         "--max-records", "10000",
         "--timeout", "30"
       ],

@@ -8,7 +8,8 @@
 *.log
 
 # Environment files
-#.env*
+.env
+# Keep .env.template in git but exclude actual .env file
 
 # Python
 __pycache__/

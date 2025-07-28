@@ -5,8 +5,8 @@ Built with FastMCP with modular architecture and security improvements
 """
 import argparse
 import sys
-from database.connection import init_database, backup_database
-from server.mcp_server import create_mcp_server, setup_backup_scheduler
+from database.connection import init_database, db_manager
+from server.mcp_server import create_mcp_server
 from utils.logging_utils import setup_logging, get_logger
 from config.settings import config
 
@@ -41,12 +41,6 @@ def start_mcp_server():
         logger.info("Initializing database...")
         init_database()
         
-        # Create initial backup if enabled
-        if config.DB_BACKUP_ENABLED:
-            logger.info("Creating initial backup...")
-            backup_database()
-            setup_backup_scheduler()
-        
         # Create and configure the MCP server
         logger.info("Creating MCP server...")
         mcp = create_mcp_server()
@@ -59,6 +53,9 @@ def start_mcp_server():
         logger.info("Server stopped by user")
     except Exception as e:
         logger.error(f"Critical error: {e}")
+    finally:
+        logger.info("Closing database connections...")
+        db_manager.close_all()
         sys.exit(1)
 
 

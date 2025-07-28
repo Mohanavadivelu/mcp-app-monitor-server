@@ -2,11 +2,9 @@
 MCP Server setup and tools registration
 """
 import json
-import threading
-import time
 from datetime import datetime
 from mcp.server.fastmcp import FastMCP
-from database.connection import get_secure_db_connection, backup_database
+from database.connection import db_manager
 from server.decorators import rate_limit, audit_log, validate_input
 from config.settings import config
 from utils.logging_utils import get_logger
@@ -46,7 +44,7 @@ def create_mcp_server() -> FastMCP:
             except ValueError:
                 return "Error: Invalid log_date format (use ISO format)"
             
-            with get_secure_db_connection() as conn:
+            with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
                 
                 cursor.execute("""
@@ -89,7 +87,7 @@ def create_mcp_server() -> FastMCP:
             if record_id <= 0:
                 return "Error: Invalid record ID"
             
-            with get_secure_db_connection() as conn:
+            with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
                 
                 # Check if record exists first
@@ -132,7 +130,7 @@ def create_mcp_server() -> FastMCP:
             if limit <= 0:
                 return "Error: Invalid limit value"
             
-            with get_secure_db_connection() as conn:
+            with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
                 
                 cursor.execute("""
@@ -190,7 +188,7 @@ def create_mcp_server() -> FastMCP:
             if limit is None or limit > config.MAX_QUERY_RESULTS:
                 limit = config.MAX_QUERY_RESULTS
                 
-            with get_secure_db_connection() as conn:
+            with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
                 
                 cursor.execute("""
@@ -241,7 +239,7 @@ def create_mcp_server() -> FastMCP:
         Get database statistics with performance monitoring.
         """
         try:
-            with get_secure_db_connection() as conn:
+            with db_manager.get_connection() as conn:
                 cursor = conn.cursor()
                 
                 # Total records
@@ -285,18 +283,3 @@ def create_mcp_server() -> FastMCP:
             return "Error getting database stats: Database operation failed"
     
     return mcp
-
-
-def setup_backup_scheduler():
-    """Setup periodic database backups"""
-    if not config.DB_BACKUP_ENABLED:
-        return
-    
-    def backup_worker():
-        while True:
-            time.sleep(config.DB_BACKUP_INTERVAL)
-            backup_database()
-    
-    backup_thread = threading.Thread(target=backup_worker, daemon=True)
-    backup_thread.start()
-    logger.info(f"Backup scheduler started (interval: {config.DB_BACKUP_INTERVAL}s)")

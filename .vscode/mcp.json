@@ -7,7 +7,7 @@
       "password": true
     },
     {
-      "type": "promptString", 
+      "type": "promptString",
       "id": "admin-user",
       "description": "Admin Username",
       "password": false
@@ -16,10 +16,9 @@
   "servers": {
     "app-monitor": {
       "type": "stdio",
-      "command": "python",
+      "command": "C:/Users/Movadivelu/AppData/Local/Programs/Python/Python313/python.exe",
       "args": [
         "${workspaceFolder}/app_monitor_server.py",
-        "--log-level", "INFO",
         "--max-records", "10000",
         "--timeout", "30"
       ],
@@ -49,7 +48,7 @@
         "enabled": true,
         "files": [
           "${workspaceFolder}/app_monitor_server.py",
-          "${workspaceFolder}/*.py",
+          "${workspaceFolder}/**/*.py",
           "${workspaceFolder}/.env.mcp",
           "${workspaceFolder}/requirements.txt"
         ],

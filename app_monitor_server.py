@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+DB_JOURNAL_MODE=DELETEDB_JOURNAL_MODE=DELETE#!/usr/bin/env python3
 """
 Enhanced MCP Server for Application Monitoring Data
 Built with FastMCP with security and stability improvements
@@ -36,7 +36,7 @@ class Config:
         self.ADMIN_USER = os.getenv("ADMIN_USER", "admin")
         self.DB_ENCRYPTION_KEY = os.getenv("DB_ENCRYPTION_KEY", "")
         self.ENABLE_AUDIT_LOG = os.getenv("ENABLE_AUDIT_LOG", "true").lower() == "true"
-        self.DB_BACKUP_ENABLED = os.getenv("DB_BACKUP_ENABLED", "true").lower() == "true"
+        self.DB_BACKUP_ENABLED = os.getenv("DB_BACKUP_ENABLED", "false").lower() == "true"
         self.DB_BACKUP_INTERVAL = int(os.getenv("DB_BACKUP_INTERVAL", "3600"))
 
 config = Config()
@@ -121,7 +121,7 @@ def get_secure_db_connection():
         # Enable foreign key constraints
         conn.execute("PRAGMA foreign_keys = ON")
         # Set secure pragmas
-        conn.execute("PRAGMA journal_mode = WAL")  # Better concurrency
+        conn.execute("PRAGMA journal_mode = DELETE")  # No WAL files created
         conn.execute("PRAGMA synchronous = NORMAL")  # Balance between safety and speed
         yield conn
     except sqlite3.Error as e:
@@ -202,6 +202,23 @@ def backup_database():
                 
     except Exception as e:
         logger.error(f"Failed to create database backup: {e}")
+
+def cleanup_wal_files():
+    """Clean up WAL and SHM files"""
+    try:
+        db_dir = config.DB_PATH.parent
+        # Clean up backup WAL files
+        for wal_file in db_dir.glob("*.db-wal"):
+            wal_file.unlink()
+            logger.info(f"Removed WAL file: {wal_file}")
+        
+        # Clean up backup SHM files  
+        for shm_file in db_dir.glob("*.db-shm"):
+            shm_file.unlink()
+            logger.info(f"Removed SHM file: {shm_file}")
+            
+    except Exception as e:
+        logger.error(f"Failed to clean up WAL files: {e}")
 
 # Enhanced MCP tools with security features
 @mcp.tool()
